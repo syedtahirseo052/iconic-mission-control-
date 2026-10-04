@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set hide_nav = True %}
+{% block title %}Log in{% endblock %}
+{% block login_content %}
+
+<div class="login-wrap">
+  <div class="card login-card">
+    <div class="login-brand">
+      <span class="logo-mark">◈</span>
+      <div>
+        <div class="logo-name">IconicNewswire</div>
+        <div class="logo-tag">YOUR TEAM · OUR MISSION</div>
+      </div>
+    </div>
+    <h1 class="login-title">Welcome back, Tahir</h1>
+    <p class="login-sub">Sign in to your Mission Control.</p>
+    {% if error %}
+    <div class="alert alert-error">⚠ {{ error }}</div>
+    {% endif %}
+    <form method="post" action="/login">
+      <div class="form-group">
+        <label for="login-user">Username</label>
+        <input id="login-user" name="username" type="text" autocomplete="username"
+          required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="login-pass">Password</label>
+        <input id="login-pass" name="password" type="password"
+          autocomplete="current-password" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-block">Log in</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

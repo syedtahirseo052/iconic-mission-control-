@@ -1,0 +1,11 @@
+# Mission Control dashboard (FastAPI). Pinned to the versions verified locally.
+fastapi==0.142.2
+uvicorn==0.54.0
+bcrypt==5.0.0
+itsdangerous==2.2.0
+Jinja2==3.1.6
+python-multipart==0.0.32
+# Google Sheets API via service account (used only when
+# GOOGLE_SERVICE_ACCOUNT_JSON is set; local dev uses hatch_gws_cli).
+google-api-python-client
+google-auth

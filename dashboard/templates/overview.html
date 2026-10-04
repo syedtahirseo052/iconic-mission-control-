@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% set active = "overview" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+
+<section class="eyebrow"><span class="dot"></span>LIVE OVERVIEW</section>
+<div class="sec-head">
+  <div>
+    <h2 class="sec-title">Departments Overview</h2>
+    <p class="sec-sub">Real-time stats for every department · click an arrow to open its board.</p>
+  </div>
+  <span class="pill pill-count">{{ cards|length }} departments</span>
+</div>
+
+<div class="dept-grid">
+  {% for c in cards %}
+  <article class="dept-card" style="--dept: {{ c.color }}">
+    <span class="dept-edge"></span>
+    <div class="dept-head">
+      <span class="dept-icon">
+        {% if c.icon == "megaphone" %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080C11" stroke-width="2"><path d="M3 11v3l4 1 2 5h2l-1.5-4.5L21 18V6L9.5 10.5 8 6H6L4.5 10 3 11z"/></svg>
+        {% elif c.icon == "search" %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080C11" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        {% elif c.icon == "share" %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080C11" stroke-width="2"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.2 10.8 7.6-3.6M8.2 13.2l7.6 3.6"/></svg>
+        {% elif c.icon == "cpu" %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080C11" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>
+        {% else %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080C11" stroke-width="2"><path d="m3 8 9-5 9 5-9 5-9-5z"/><path d="M3 12.5 12 18l9-5.5"/><path d="M3 17l9 5 9-5"/></svg>
+        {% endif %}
+      </span>
+      <div class="dept-name">
+        <h3>{{ c.label }}</h3>
+        <p class="muted">View board</p>
+      </div>
+      <a class="arrow-btn" href="/tasks" aria-label="Open {{ c.label }} board">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+    <svg class="spark" viewBox="0 0 280 56" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="sg-{{ c.key }}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="{{ c.color }}" stop-opacity="0.35"/>
+          <stop offset="1" stop-color="{{ c.color }}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <polygon points="{{ c.spark }}" fill="url(#sg-{{ c.key }})"/>
+      <polyline points="{{ c.spark }}" fill="none" stroke="{{ c.color }}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p class="spark-cap">DONE TASKS · LAST 14 DAYS</p>
+    <div class="stat-tiles">
+      <div class="stat-tile"><span class="stat-num">{{ c.active }}</span><span class="stat-label">AGENTS ACTIVE</span></div>
+      <div class="stat-tile"><span class="stat-num">{{ c.open_tasks }}</span><span class="stat-label">OPEN TASKS</span></div>
+      <div class="stat-tile"><span class="stat-num">{{ c.done7 }}</span><span class="stat-label">DONE (7D)</span></div>
+      <div class="stat-tile"><span class="stat-num">{{ c.pending_appr }}</span><span class="stat-label">PENDING APPROVAL</span></div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+<!-- Monthly target tracker (editable — targets.json) -->
+<section class="card target-card">
+  <div class="target-head">
+    <h2>{{ target_label }}</h2>
+    <div class="target-head-right">
+      <span class="pill {{ 'pill-done' if pct >= 100 else 'pill-warn' }}">{{ "%.1f"|format(pct) }}%</span>
+      <button type="button" class="btn-ghost-sm" id="target-edit-btn">Edit target</button>
+    </div>
+  </div>
+  <div class="target-nums">
+    <div class="target-num">
+      <span class="target-label">Actual (WON revenue, {{ target_ym }})</span>
+      <span class="target-value">${{ "{:,.0f}".format(actual) }}</span>
+    </div>
+    <div class="target-num">
+      <span class="target-label">Target</span>
+      <span class="target-value target-muted">${{ "{:,.0f}".format(target) }}</span>
+    </div>
+    <div class="target-num">
+      <span class="target-label">Remaining</span>
+      <span class="target-value">${{ "{:,.0f}".format(target - actual) }}</span>
+    </div>
+  </div>
+  <div class="progress"><div class="progress-fill" style="width: {{ '%.1f'|format(pct) }}%"></div></div>
+  {% if won_count > 0 %}
+  <p class="fine">{{ won_count }} deal(s) marked WON with {{ target_ym }} revenue logged in the Lead DB.</p>
+  {% else %}
+  <p class="fine">No revenue logged yet — no rows in the Lead DB have both revenue &gt; 0 and deal_status = WON dated {{ target_ym }}.</p>
+  {% endif %}
+</section>
+
+<!-- At-a-glance visibility cards -->
+<section class="vis-grid">
+  <div class="card vis-card">
+    <h2>Tasks by status</h2>
+    <div class="vis-statuses">
+      {% for s in tasks_by_status %}
+      <div class="vis-status">
+        <span class="vis-num">{{ s.count }}</span>
+        <span class="status {{ s.css }}">{{ s.title }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% if not tasks_by_status %}
+    <p class="empty-note">No tasks found in the Tasks sheet.</p>
+    {% endif %}
+    <a class="vis-link" href="/tasks">Open the live task board →</a>
+  </div>
+
+  <div class="card vis-card vis-approval {% if approval_count == 0 %}vis-calm{% endif %}">
+    <h2>Awaiting Tahir's approval</h2>
+    <div class="approval-big">
+      <span class="approval-num">{{ approval_count }}</span>
+      <span class="approval-label">draft{{ "s" if approval_count != 1 }}/message{{ "s" if approval_count != 1 }} waiting</span>
+    </div>
+    {% if approval_count > 0 %}
+    <ul class="approval-list">
+      {% for t in approval_items[:5] %}
+      <li><span class="mono fine">{{ t.task_id }}</span> {{ (t.objective or "")[:90] }}</li>
+      {% endfor %}
+      {% if approval_count > 5 %}<li class="fine">+ {{ approval_count - 5 }} more</li>{% endif %}
+    </ul>
+    {% else %}
+    <p class="empty-note">Nothing waiting on Tahir right now.</p>
+    {% endif %}
+    <a class="vis-link" href="/approvals">Review approvals →</a>
+  </div>
+
+  <div class="card vis-card">
+    <h2>Latest reports</h2>
+    {% if latest_reports %}
+    <ul class="report-list">
+      {% for r in latest_reports %}
+      <li><span class="mono">{{ r.name }}</span><span class="fine">{{ r.mtime_str }}</span>{% if r.is_today %} <span class="pill pill-today">today</span>{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-note">No reports in <span class="mono">reports/</span> yet.</p>
+    {% endif %}
+    <a class="vis-link" href="/activity">Full activity log →</a>
+  </div>
+</section>
+
+<!-- Tasks snapshot strip -->
+<section>
+  <div class="sec-head">
+    <h2 class="sec-title-sm">Live tasks snapshot</h2>
+    <a class="vis-link" href="/tasks">Full board →</a>
+  </div>
+  {% if snapshot %}
+  <div class="snapshot-strip">
+    {% for t in snapshot %}
+    <div class="card snapshot-card" data-search="{{ (t.task_id ~ ' ' ~ t.objective ~ ' ' ~ t.assigned_to)|e }}">
+      <span class="mono fine">{{ t.task_id }}</span>
+      <p class="snapshot-obj">{{ (t.objective or "")[:110] }}</p>
+      <div class="snapshot-meta">
+        <span class="fine">{{ t.assigned_to or "—" }}</span>
+        <span class="status st-{{ (t.priority or 'medium')|lower }}">{{ t.priority or "MEDIUM" }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-note">No open tasks right now.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

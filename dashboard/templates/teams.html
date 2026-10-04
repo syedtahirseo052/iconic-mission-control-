@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% set active = "teams" %}
+{% block title %}Teams{% endblock %}
+{% block content %}
+
+<section class="eyebrow"><span class="dot"></span>ORGANIZATION</section>
+<div class="sec-head">
+  <div>
+    <h2 class="sec-title">Company Teams</h2>
+    <p class="sec-sub">{{ total }} agents · 4 departments + CEO office · open task counts live from the Tasks sheet</p>
+  </div>
+  <button class="btn" id="add-agent-btn" type="button">+ Add agent</button>
+</div>
+
+<form class="filters" method="get" action="/teams">
+  <label>Status
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      <option value="ACTIVE" {% if status_filter == "ACTIVE" %}selected{% endif %}>ACTIVE</option>
+      <option value="STANDBY" {% if status_filter == "STANDBY" %}selected{% endif %}>STANDBY</option>
+      <option value="PAUSED" {% if status_filter == "PAUSED" %}selected{% endif %}>PAUSED</option>
+    </select>
+  </label>
+  {% if status_filter %}
+  <a class="btn-ghost" href="/teams">Clear filter</a>
+  {% endif %}
+</form>
+
+{% if not sections %}
+<p class="empty-note">No agents to show — the Agent Registry sheet is unreachable or empty.</p>
+{% endif %}
+
+{% for s in sections %}
+<section class="team-section">
+  <div class="team-head">
+    <h2>{{ s.label }}</h2>
+    <span class="team-meta mono">{{ s.members|length }} AGENTS · {{ s.active }} ACTIVE</span>
+  </div>
+  <div class="team-grid">
+    {% for a in s.members %}
+    <div class="card agent-card" data-search="{{ (a.agent_name ~ ' ' ~ a.reports_to ~ ' ' ~ a.kpis)|e }}">
+      <div class="agent-top">
+        <span class="status {% if a.status == 'PENDING REGISTRATION' %}st-spec{% else %}st-{{ a.status|lower }}{% endif %}">{{ a.status }}</span>
+        {% if a.open_tasks > 0 %}
+        <span class="open-count">{{ a.open_tasks }} open</span>
+        {% endif %}
+      </div>
+      <h3 class="agent-name">{{ a.agent_name or "—" }}</h3>
+      <p class="agent-reports">Reports to: <strong>{{ a.reports_to or "—" }}</strong></p>
+      {% if a.kpis %}
+      <p class="agent-kpis">{{ a.kpis }}</p>
+      {% endif %}
+      {% if a.spec_only %}
+      <p class="fine spec-note">ORG_CHART v2 spec — pending registration in the sheet</p>
+      {% else %}
+      <div class="agent-actions">
+        <button type="button" class="btn-sm" data-assign="{{ a.agent_name|e }}">Assign task</button>
+        <button type="button" class="btn-sm btn-ghost-sm" data-message="{{ a.agent_name|e }}">Message</button>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+{% endblock %}

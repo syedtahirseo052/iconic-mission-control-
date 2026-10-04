@@ -1,0 +1,30 @@
+# Render blueprint for the IconicNewswire Mission Control dashboard.
+# Deploy via: Render dashboard > New > Blueprint > connect this repo.
+# Then set the secret env vars below (all sync:false = must be entered manually).
+services:
+  - type: web
+    name: iconicnewswire-mission-control
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      # bcrypt hash of Tahir's password (NOT the plain password).
+      # Generate locally:  python dashboard/set_password.py
+      # then paste the printed hash as this env var's value.
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      # Full service-account key JSON (single line). The service account's
+      # client_email must be shared on the Lead DB, Tasks, and Agent Registry
+      # sheets (Viewer for reads, Editor for appends).
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      # Optional: monthly targets as JSON, e.g. {"2026-10":10000,"2026-11":20000}.
+      # Wins over dashboard/targets.json. Edits via the dashboard are
+      # ephemeral while this is set (free-tier filesystem resets on restart).
+      - key: TARGETS_JSON
+        sync: false
+      # Optional: session signing secret. If unset, one is generated and
+      # stored in a file (lost on restart -> everyone gets logged out).
+      - key: DASHBOARD_SECRET
+        sync: false

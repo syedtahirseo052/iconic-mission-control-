@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% set active = "live" %}
+{% block title %}Live Workflow{% endblock %}
+{% block content %}
+
+<section class="eyebrow"><span class="dot dot-live"></span>LIVE WORKFLOW</section>
+<div class="sec-head">
+  <div>
+    <h2 class="sec-title">Live Workflow</h2>
+    <p class="sec-sub">Who is doing what, who assigned whom, and recent messages — straight from the sheets. <span class="mono" id="live-updated">loading…</span></p>
+  </div>
+  <span class="pill pill-live"><span class="dot"></span>auto-refresh 30s</span>
+</div>
+
+<div class="live-grid">
+  <section class="card live-card">
+    <h3 class="live-title">Now Working</h3>
+    <p class="live-sub">Agents with a task in progress right now</p>
+    <div id="live-working" class="live-list"></div>
+  </section>
+
+  <section class="card live-card">
+    <h3 class="live-title">Dispatch Feed</h3>
+    <p class="live-sub">Latest task assignments — who assigned whom</p>
+    <div id="live-dispatch" class="live-list"></div>
+  </section>
+
+  <section class="card live-card">
+    <h3 class="live-title">Message Feed</h3>
+    <p class="live-sub">Recent direct messages — replies appear only when real</p>
+    <div id="live-messages" class="live-list"></div>
+  </section>
+
+  <section class="card live-card live-wide">
+    <h3 class="live-title">Agent Pulse</h3>
+    <p class="live-sub">Last real activity per agent, from task timestamps — never simulated</p>
+    <div id="live-pulse" class="pulse-grid"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function workingHTML(items) {
+    if (!items.length) {
+      return '<div class="empty-note"><div class="empty-ic">⏸</div>' +
+        '<strong>No agents in progress right now.</strong>' +
+        '<span>Nothing in the Tasks sheet has status IN PROGRESS at the moment.</span></div>';
+    }
+    return items.map(function (w) {
+      return '<div class="live-row">' +
+        '<span class="pulse-dot"></span>' +
+        '<div class="live-main"><strong>' + esc(w.agent) + '</strong>' +
+        '<span class="live-dept">' + esc(w.department || "—") + '</span>' +
+        '<span class="live-obj">' + esc(w.objective) + '</span></div>' +
+        '<div class="live-side"><span class="task-id mono">' + esc(w.task_id) + '</span>' +
+        '<span class="live-when mono">' + esc(w.since) + '</span></div></div>';
+    }).join("");
+  }
+  function dispatchHTML(items) {
+    if (!items.length) {
+      return '<div class="empty-note"><strong>No assignments yet.</strong>' +
+        '<span>The Tasks sheet is empty.</span></div>';
+    }
+    return items.map(function (d) {
+      return '<div class="live-row">' +
+        '<div class="live-main"><span class="live-route"><strong>' + esc(d.created_by || "?") +
+        '</strong> <span class="route-arrow">→</span> <strong>' + esc(d.assigned_to || "?") +
+        '</strong></span>' +
+        '<span class="live-obj">' + esc(d.objective) + '</span></div>' +
+        '<div class="live-side"><span class="task-id mono">' + esc(d.task_id) + '</span>' +
+        '<span class="live-when mono">' + esc(d.when) + '</span></div></div>';
+    }).join("");
+  }
+  function messagesHTML(items) {
+    if (!items.length) {
+      return '<div class="empty-note"><strong>No direct messages yet.</strong>' +
+        '<span>Use “Message” on any agent card to send one.</span></div>';
+    }
+    return items.map(function (m) {
+      var cls = m.direction === "out" ? "msg-out" : "msg-in";
+      var who = m.direction === "out" ? "Tahir → " + m.agent : m.agent;
+      return '<div class="msg ' + cls + '">' +
+        '<div class="msg-who mono">' + esc(who) + ' · ' + esc(m.when) + '</div>' +
+        '<div class="msg-text">' + esc(m.text) + '</div></div>';
+    }).join("");
+  }
+  function pulseHTML(items) {
+    if (!items.length) {
+      return '<div class="empty-note"><strong>No agents in registry.</strong></div>';
+    }
+    return items.map(function (p) {
+      var st = (p.status || "").toUpperCase();
+      var badge = st === "ACTIVE" ? "st-active" :
+                  st === "PAUSED" ? "st-paused" : "st-standby";
+      return '<div class="pulse-row">' +
+        '<div class="pulse-main"><strong>' + esc(p.agent) + '</strong>' +
+        '<span class="live-dept">' + esc(p.department || "—") + '</span></div>' +
+        '<span class="pill ' + badge + '">' + esc(st || "—") + '</span>' +
+        '<span class="live-when mono">' + esc(p.last_activity) + '</span></div>';
+    }).join("");
+  }
+  function load() {
+    fetch("/api/live", {credentials: "same-origin"})
+      .then(function (r) {
+        if (r.status === 401) { window.location.href = "/login"; return null; }
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data || !data.ok) { return; }
+        var L = data.live;
+        document.getElementById("live-working").innerHTML = workingHTML(L.now_working);
+        document.getElementById("live-dispatch").innerHTML = dispatchHTML(L.dispatch_feed);
+        document.getElementById("live-messages").innerHTML = messagesHTML(L.message_feed);
+        document.getElementById("live-pulse").innerHTML = pulseHTML(L.agent_pulse);
+        var g = L.generated_at || "";
+        document.getElementById("live-updated").textContent = "updated " + g;
+      })
+      .catch(function (err) {
+        document.getElementById("live-updated").textContent =
+          "refresh failed (" + err.message + ") — retrying";
+      });
+  }
+  load();
+  setInterval(load, 30000);
+})();
+</script>
+{% endblock %}

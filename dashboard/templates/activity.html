@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set active = "activity" %}
+{% block title %}Activity{% endblock %}
+{% block content %}
+
+<section class="eyebrow"><span class="dot"></span>HISTORY</section>
+<div class="sec-head">
+  <div>
+    <h2 class="sec-title">Activity</h2>
+    <p class="sec-sub">Report files written by agents and cron runs (newest first)</p>
+  </div>
+</div>
+
+{% if briefing %}
+<section class="card">
+  <h2>Today's briefing — <span class="mono">{{ briefing_name }}</span></h2>
+  <div class="briefing"><pre>{{ briefing }}</pre></div>
+</section>
+{% else %}
+<section class="card">
+  <h2>Today's briefing</h2>
+  <p class="empty-note">No daily briefing file yet — nothing has been written to <span class="mono">reports/</span> today.</p>
+</section>
+{% endif %}
+
+{% if whatsapp %}
+<section class="card">
+  <h2>WhatsApp briefing — compact (<span class="mono">{{ wa_len }}</span> chars)</h2>
+  <p class="fine">The compact version Tahir gets on WhatsApp (<span class="mono">reports/daily-brief-whatsapp.txt</span>).</p>
+  <div class="briefing"><pre>{{ whatsapp }}</pre></div>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>Report files</h2>
+  {% if reports %}
+  <ul class="report-list">
+    {% for r in reports %}
+    <li><span class="mono">{{ r.name }}</span> <span class="fine">— {{ r.mtime_str }}</span>{% if r.is_today %} <span class="pill pill-today">today</span>{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty-note">No reports found — the <span class="mono">reports/</span> directory is empty.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

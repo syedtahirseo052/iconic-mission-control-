@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set active = "agents" %}
+{% block title %}Agents{% endblock %}
+{% block content %}
+
+<section class="eyebrow"><span class="dot"></span>DIRECTORY</section>
+<div class="sec-head">
+  <div>
+    <h2 class="sec-title">Agents</h2>
+    <p class="sec-sub">{{ rows|length }} of {{ total }} registered agents · registry spec target: {{ spec_total }}{% if total < spec_total %} ({{ spec_total - total }} not yet registered in the sheet){% endif %}</p>
+  </div>
+</div>
+
+<form class="filters" method="get" action="/agents">
+  <label>Department
+    <select name="department" onchange="this.form.submit()">
+      <option value="">All departments</option>
+      {% for d in all_depts %}
+      <option value="{{ d }}" {% if d == dept_filter %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Status
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for s in all_statuses %}
+      <option value="{{ s }}" {% if s == status_filter %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% if dept_filter or status_filter %}
+  <a class="btn-ghost" href="/agents">Clear filters</a>
+  {% endif %}
+</form>
+
+<div class="card table-card">
+  {% if rows %}
+  <table class="tbl">
+    <thead>
+      <tr><th>Agent</th><th>Department</th><th>Reports to</th><th>Status</th><th>KPIs</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for a in rows %}
+      <tr data-search="{{ (a.agent_name ~ ' ' ~ a.department ~ ' ' ~ a.reports_to)|e }}">
+        <td class="strong">{{ a.agent_name or "—" }}</td>
+        <td>{{ a.department or "—" }}</td>
+        <td>{{ a.reports_to or "—" }}</td>
+        <td><span class="status st-{{ (a.status or 'unknown')|lower }}">{{ a.status or "—" }}</span></td>
+        <td class="kpi">{{ a.kpis or "—" }}</td>
+        <td class="row-actions">
+          <button type="button" class="btn-xs" data-assign="{{ a.agent_name|e }}">Assign</button>
+          <button type="button" class="btn-xs btn-ghost-xs" data-message="{{ a.agent_name|e }}">Message</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-note">No agents match these filters.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

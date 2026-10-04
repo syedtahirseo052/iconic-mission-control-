@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% set active = "tasks" %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+
+<section class="eyebrow"><span class="dot"></span>WORK QUEUE</section>
+<div class="sec-head">
+  <div>
+    <h2 class="sec-title">Task Board</h2>
+    <p class="sec-sub">{{ total }} tasks total · {{ open_count }} open or in progress · sorted by priority, then newest</p>
+  </div>
+  <button class="btn" id="assign-task-btn" type="button">+ Assign task</button>
+</div>
+
+{% if not groups %}
+<p class="empty-note">No tasks found in the Tasks sheet.</p>
+{% endif %}
+
+{% for key, title, items in groups %}
+<section class="task-group">
+  <div class="team-head">
+    <h2>{{ title }}</h2>
+    <span class="team-meta mono">{{ items|length }} TASKS</span>
+  </div>
+  <div class="task-list">
+    {% for t in items %}
+    <div class="card task-card" data-search="{{ (t.task_id ~ ' ' ~ t.objective ~ ' ' ~ t.assigned_to ~ ' ' ~ t.department)|e }}">
+      <div class="task-top">
+        <span class="task-id mono">{{ t.task_id or "—" }}</span>
+        <span class="prio p-{{ (t.priority or 'na')|lower }}">{{ t.priority or "—" }}</span>
+      </div>
+      <p class="task-objective">{{ t.objective or "—" }}</p>
+      <div class="task-meta">
+        <span>Assigned to <strong>{{ t.assigned_to or "—" }}</strong></span>
+        <span>{{ t.department or "—" }}</span>
+        {% if t.created_at %}<span class="fine">created {{ t.created_at }}</span>{% endif %}
+        {% if t.completed_at %}<span class="fine">completed {{ t.completed_at }}</span>{% endif %}
+      </div>
+      {% if t.error %}
+      <p class="task-error">⚠ {{ t.error }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+{% endblock %}

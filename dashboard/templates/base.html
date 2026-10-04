@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Mission Control{% endblock %} — IconicNewswire AI</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+{% if hide_nav %}
+  {% block login_content %}{% endblock %}
+{% else %}
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="side-logo">
+      <span class="logo-mark">◈</span>
+      <div class="logo-text">
+        <div class="logo-name">IconicNewswire</div>
+        <div class="logo-tag">YOUR TEAM · OUR MISSION</div>
+      </div>
+    </div>
+    <div class="side-dash"><span class="pill pill-dash">DASHBOARD</span></div>
+
+    <p class="side-label">MAIN MENU</p>
+    <nav class="side-nav">
+      <a href="/" class="side-item {% if active=='overview' %}on{% endif %}">
+        <span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></span>
+        <span>Overview</span>
+      </a>
+      <a href="/live" class="side-item {% if active=='live' %}on{% endif %}">
+        <span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
+        <span>Live Workflow</span>
+      </a>
+      <a href="/agents" class="side-item {% if active=='agents' %}on{% endif %}">
+        <span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.6c2.9.4 5 2.6 5 5.4"/></svg></span>
+        <span>Agents</span>
+      </a>
+      <a href="/teams" class="side-item {% if active=='teams' %}on{% endif %}">
+        <span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span>
+        <span>Teams</span>
+      </a>
+      <a href="/tasks" class="side-item {% if active=='tasks' %}on{% endif %}">
+        <span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 5-5.5"/></svg></span>
+        <span>Tasks</span>
+        {% if open_count and open_count > 0 %}<span class="side-badge">{{ open_count }}</span>{% endif %}
+      </a>
+      <a href="/approvals" class="side-item {% if active=='approvals' %}on{% endif %}">
+        <span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 5-5.5"/></svg></span>
+        <span>Approvals</span>
+        {% if approval_count and approval_count > 0 %}<span class="side-badge side-badge-warn">{{ approval_count }}</span>{% endif %}
+      </a>
+      <a href="/activity" class="side-item {% if active=='activity' %}on{% endif %}">
+        <span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
+        <span>Activity</span>
+      </a>
+    </nav>
+
+    <div class="side-spacer"></div>
+
+    <p class="side-label">ACCOUNT</p>
+    <div class="side-user">
+      <span class="avatar avatar-lime">ST</span>
+      <div class="side-user-meta">
+        <div class="side-user-name">Syed Tahir Saleem</div>
+        <span class="pill pill-admin">ADMIN</span>
+      </div>
+      <a href="/logout" class="side-logout" title="Log out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="tb-left">
+        <span class="pill pill-live"><span class="dot"></span>Mission Control</span>
+        <div>
+          <h1 class="tb-title">{{ page_title }}</h1>
+          <p class="tb-sub">{{ today_str }} · Welcome back, Tahir</p>
+        </div>
+      </div>
+      <div class="tb-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="top-search" type="text" placeholder="Search agents, tasks…" autocomplete="off">
+        <kbd>⌘K</kbd>
+      </div>
+      <div class="tb-right">
+        <a class="icon-btn" href="/approvals" title="Approvals awaiting Tahir">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          {% if approval_count and approval_count > 0 %}<span class="badge">{{ approval_count }}</span>{% endif %}
+        </a>
+        <div class="user-card">
+          <span class="avatar avatar-lime">ST</span>
+          <div class="uc-meta">
+            <div class="uc-name">Syed Tahir Saleem</div>
+            <span class="pill pill-admin">ADMIN</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="mobile-nav" aria-label="Pages">
+      <a href="/" class="{% if active=='overview' %}on{% endif %}">Overview</a>
+      <a href="/live" class="{% if active=='live' %}on{% endif %}">Live</a>
+      <a href="/agents" class="{% if active=='agents' %}on{% endif %}">Agents</a>
+      <a href="/teams" class="{% if active=='teams' %}on{% endif %}">Teams</a>
+      <a href="/tasks" class="{% if active=='tasks' %}on{% endif %}">Tasks</a>
+      <a href="/approvals" class="{% if active=='approvals' %}on{% endif %}">Approvals</a>
+      <a href="/activity" class="{% if active=='activity' %}on{% endif %}">Activity</a>
+    </nav>
+
+    <main class="content">
+      {% if errors %}
+      <div class="alerts">
+        {% for e in errors %}
+        <div class="alert alert-error">⚠ {{ e }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<!-- Assign Task modal (shared) -->
+<div class="modal-overlay" id="assign-modal" hidden>
+  <div class="modal" role="dialog" aria-label="Assign task">
+    <div class="modal-head">
+      <h2>Assign task</h2>
+      <button class="modal-x" data-close-modal aria-label="Close">✕</button>
+    </div>
+    <form id="assign-form">
+      <div class="form-group">
+        <label for="assign-agent">Agent</label>
+        <select id="assign-agent" name="agent" required></select>
+      </div>
+      <div class="form-group">
+        <label for="assign-objective">Objective <span class="req">*</span></label>
+        <textarea id="assign-objective" name="objective" rows="3" required
+          placeholder="What exactly should this agent do?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="assign-priority">Priority</label>
+          <select id="assign-priority" name="priority">
+            <option>LOW</option>
+            <option selected>MEDIUM</option>
+            <option>HIGH</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="assign-deadline">Deadline (optional)</label>
+          <input id="assign-deadline" name="deadline" type="date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="assign-input">Details / input (optional)</label>
+        <textarea id="assign-input" name="input_text" rows="2"
+          placeholder="Links, context, constraints…"></textarea>
+      </div>
+      <p class="form-error" id="assign-error" hidden></p>
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" data-close-modal>Cancel</button>
+        <button type="submit" class="btn">Assign task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Agent modal (shared) -->
+<div class="modal-overlay" id="addagent-modal" hidden>
+  <div class="modal" role="dialog" aria-label="Add agent">
+    <div class="modal-head">
+      <h2>Add agent</h2>
+      <button class="modal-x" data-close-modal aria-label="Close">✕</button>
+    </div>
+    <form id="addagent-form">
+      <div class="form-group">
+        <label for="aa-name">Agent name <span class="req">*</span></label>
+        <input id="aa-name" name="name" type="text" required maxlength="80"
+          placeholder="e.g. Podcast Outreach Hunter">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="aa-dept">Department <span class="req">*</span></label>
+          <select id="aa-dept" name="department" required></select>
+        </div>
+        <div class="form-group">
+          <label for="aa-reports">Reports to <span class="req">*</span></label>
+          <select id="aa-reports" name="reports_to" required></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="aa-role">Role summary <span class="req">*</span></label>
+        <textarea id="aa-role" name="role_summary" rows="3" required
+          placeholder="What does this agent do, in one or two sentences?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="aa-kpis">KPIs</label>
+          <input id="aa-kpis" name="kpis" type="text"
+            placeholder="e.g. qualified leads/day">
+        </div>
+        <div class="form-group">
+          <label for="aa-status">Status</label>
+          <select id="aa-status" name="status">
+            <option selected>STANDBY</option>
+            <option>ACTIVE</option>
+          </select>
+        </div>
+      </div>
+      <p class="form-error" id="addagent-error" hidden></p>
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" data-close-modal>Cancel</button>
+        <button type="submit" class="btn">Add agent</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Target editor modal (shared) -->
+<div class="modal-overlay" id="target-modal" hidden>
+  <div class="modal" role="dialog" aria-label="Edit monthly target">
+    <div class="modal-head">
+      <h2>Monthly revenue target</h2>
+      <button class="modal-x" data-close-modal aria-label="Close">✕</button>
+    </div>
+    <form id="target-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="target-month">Month <span class="req">*</span></label>
+          <input id="target-month" name="month" type="month" required>
+        </div>
+        <div class="form-group">
+          <label for="target-amount">Target (USD) <span class="req">*</span></label>
+          <input id="target-amount" name="amount" type="number" min="0" max="100000000" step="100" required>
+        </div>
+      </div>
+      <p class="fine">Saved to <span class="mono">dashboard/targets.json</span> — the whole system reads targets from there.</p>
+      <p class="form-error" id="target-error" hidden></p>
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" data-close-modal>Cancel</button>
+        <button type="submit" class="btn">Save target</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Talk-to-Agent slide-over (shared) -->
+<div class="slide-overlay" id="thread-overlay" hidden></div>
+<aside class="slide-over" id="thread-panel" hidden aria-label="Message thread">
+  <div class="slide-head">
+    <div>
+      <h2 id="thread-title">Message</h2>
+      <p class="slide-sub">Async messages — delivered as tasks. Replies appear here only when the agent records real output. Nothing is simulated.</p>
+    </div>
+    <button class="modal-x" id="thread-close" aria-label="Close">✕</button>
+  </div>
+  <div class="thread" id="thread-messages"></div>
+  <form class="thread-form" id="thread-form">
+    <textarea id="thread-input" rows="2" maxlength="2000" required
+      placeholder="Write instructions or info for this agent…"></textarea>
+    <p class="form-error" id="thread-error" hidden></p>
+    <button type="submit" class="btn">Send message</button>
+  </form>
+</aside>
+
+<div class="toast" id="toast" hidden></div>
+<script src="/static/app.js"></script>
+{% endif %}
+</body>
+</html>

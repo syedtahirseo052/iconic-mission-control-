@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set active = "approvals" %}
+{% block title %}Approvals{% endblock %}
+{% block content %}
+
+<section class="eyebrow"><span class="dot"></span>DECISIONS</section>
+<div class="sec-head">
+  <div>
+    <h2 class="sec-title">Needs Tahir</h2>
+    <p class="sec-sub">Tasks with a status indicating approval or review is required</p>
+  </div>
+  {% if pending %}<span class="pill pill-warn">{{ pending|length }} waiting</span>{% endif %}
+</div>
+
+{% if pending %}
+<div class="task-list">
+  {% for t in pending %}
+  <div class="card task-card">
+    <div class="task-top">
+      <span class="task-id mono">{{ t.task_id or "—" }}</span>
+      <span class="status st-pending">{{ t.status or "—" }}</span>
+      <span class="prio p-{{ (t.priority or 'na')|lower }}">{{ t.priority or "—" }}</span>
+    </div>
+    <p class="task-objective">{{ t.objective or "—" }}</p>
+    <div class="task-meta">
+      <span>Assigned to <strong>{{ t.assigned_to or "—" }}</strong></span>
+      <span>{{ t.department or "—" }}</span>
+      {% if t.created_at %}<span class="fine">created {{ t.created_at }}</span>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty-card">
+  <div class="empty-emoji">✓</div>
+  <h2>No pending approvals</h2>
+  <p class="empty-note">Nothing waiting on Tahir — no task in the sheet has an approval/review status right now.</p>
+</div>
+{% endif %}
+
+{% endblock %}
